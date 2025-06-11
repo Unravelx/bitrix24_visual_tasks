@@ -4,6 +4,9 @@ from typing import Any, Dict
 import urllib.error
 import urllib.request
 
+import pandas as pd
+import requests
+
 from dotenv import load_dotenv
 
 import logic
@@ -11,7 +14,6 @@ import export
 
 
 load_dotenv()
-
 
 BASE_URL = os.getenv('URL')
 
@@ -25,9 +27,10 @@ URL = (
 def load_data(url: str) -> Dict[str, Any]:
     """Загружает данные по URL."""
     try:
-        with urllib.request.urlopen(url) as response:
-            return json.loads(response.read().decode('utf-8'))
-    except urllib.error.URLError as e:
+        # Отключаем проверку SSL (аналог первого способа)
+        response = requests.get(url, verify=False)
+        return response.json()
+    except requests.RequestException as e:
         raise ConnectionError(f"Ошибка при загрузке данных: {e}")
 
 
@@ -41,6 +44,27 @@ def load_settings(filepath: str = 'config.json') -> Dict[str, Any]:
 
 # Загрузка данных по URL
 
+def generate(date_start=None, date_end=None) -> pd.DataFrame:
+    settings = load_settings()
+    if date_start is None and date_end is None:
+        date_start = settings["start_date"]
+        date_end = settings["end_date"]
+    data = load_data(URL)
+
+    output_data = logic.generate_dates(date_start, date_end)
+
+    if settings["availability_status"] == 0:
+        output_data = logic.tasks_to_df_no_status(
+            output_data, data['result']['tasks'])
+    elif settings["availability_status"] == 1:
+        output_data = logic.tasks_to_df_with_status(
+            output_data, data['result']['tasks'])
+    else:
+        raise ValueError(
+                "availability_status должен быть 0 или 1, получено: "
+                f"{settings['availability_status']}"
+            )
+    return output_data
 
 def main():
     data = load_data(URL)
@@ -77,3 +101,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
