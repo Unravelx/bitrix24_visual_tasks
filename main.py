@@ -49,7 +49,7 @@ def generate(date_start=None, date_end=None) -> pd.DataFrame:
     if date_start is None and date_end is None:
         date_start = settings["start_date"]
         date_end = settings["end_date"]
-    data = load_data(URL+ f"filter[>deadline]={date_start}")
+    data = load_data(URL + f"&filter[>DEADLINE]={date_start}")
 
     output_data = logic.generate_dates(date_start, date_end)
 
