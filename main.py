@@ -49,16 +49,22 @@ def generate(date_start=None, date_end=None) -> pd.DataFrame:
     if date_start is None and date_end is None:
         date_start = settings["start_date"]
         date_end = settings["end_date"]
-    data = load_data(URL)
+    data = load_data(URL+ f"filter[>deadline]={date_start}")
 
     output_data = logic.generate_dates(date_start, date_end)
 
     if settings["availability_status"] == 0:
         output_data = logic.tasks_to_df_no_status(
-            output_data, data['result']['tasks'])
+            output_data, data['result']['tasks']
+        )
+    elif settings["availability_status"] == 3:
+        output_data = logic.add_tasks_with_id_to_df(
+            output_data, data['result']['tasks']
+        )
     elif settings["availability_status"] == 1:
         output_data = logic.tasks_to_df_with_status(
-            output_data, data['result']['tasks'])
+            output_data, data['result']['tasks']
+        )
     else:
         raise ValueError(
                 "availability_status должен быть 0 или 1, получено: "
@@ -74,10 +80,16 @@ def main():
 
     if settings["availability_status"] == 0:
         output_data = logic.tasks_to_df_no_status(
-            output_data, data['result']['tasks'])
+            output_data, data['result']['tasks']
+        )
     elif settings["availability_status"] == 1:
         output_data = logic.tasks_to_df_with_status(
-            output_data, data['result']['tasks'])
+            output_data, data['result']['tasks']
+        )
+    elif settings["availability_status"] == 3:
+        output_data = logic.add_tasks_with_id_to_df(
+            output_data, data['result']['tasks']
+        )
     else:
         raise ValueError(
                 "availability_status должен быть 0 или 1, получено: "

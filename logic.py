@@ -102,3 +102,49 @@ def tasks_to_df_with_status(df: pd.DataFrame, tasks_data: [List[Dict]]) -> pd.Da
         )
 
     return df
+
+
+def add_tasks_with_id_to_df(df: pd.DataFrame, tasks_data) -> pd.DataFrame:
+    """
+    Добавляет задачи в формате {id: {название, статус, даты}} в DataFrame
+
+    Параметры:
+        df (pd.DataFrame): Исходный DataFrame с колонкой "Дата"
+        tasks_data (list): Список задач, где каждая задача содержит:
+            - id (уникальный идентификатор)
+            - title (название)
+            - status (код статуса)
+            - deadline, createdDate (временные метки)
+            - responsible (ответственный)
+    """
+    tasks_dict = defaultdict(lambda: defaultdict(dict))
+
+    for task in tasks_data:
+        employee = task["responsible"]["name"]
+        task_id = str(task["id"])
+
+        # Формируем информацию о задаче
+        task_info = {
+            "title": task["title"],
+            "status_code": task["status"],
+            "start_date": task["createdDate"],
+            "end_date": task["deadline"],
+        }
+
+        # Обрабатываем временной диапазон
+        deadline = datetime.strptime(task["deadline"], "%Y-%m-%dT%H:%M:%S%z")
+        created = datetime.strptime(task["createdDate"], "%Y-%m-%dT%H:%M:%S%z")
+
+        current_date = created.date()
+        while current_date <= deadline.date():
+            date_str = current_date.strftime("%Y.%m.%d")
+            tasks_dict[date_str][employee][task_id] = task_info
+            current_date += timedelta(days=1)
+
+    # Добавляем данные в DataFrame
+    for employee in {emp for tasks in tasks_dict.values() for emp in tasks}:
+        df[employee] = df["Дата"].apply(
+            lambda x: tasks_dict[x].get(employee, {})
+        )
+
+    return df

@@ -22,7 +22,7 @@ def load_data():
 def get_data():
     date_start = request.args.get('dateStart')
     date_end = request.args.get('dateEnd')
-    print(date_end)
+
     data = main.generate(date_start, date_end)
     json_data = data.to_dict(orient='records')
     return jsonify(json_data)
