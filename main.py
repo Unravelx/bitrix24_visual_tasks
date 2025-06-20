@@ -16,11 +16,15 @@ import export
 load_dotenv()
 
 BASE_URL = os.getenv('URL')
-
 URL = (
     f"{BASE_URL}/tasks.task.list?"
     "&select[]=ID&select[]=TITLE&select[]=STATUS&select[]=DEADLINE"
     "&select[]=START_DATE_PLAN&select[]=CREATED_DATE&select[]=RESPONSIBLE_ID"
+)
+
+BASE_USERS_URL = os.getenv('USERS_URL')
+USERS_URL = (
+    f"{BASE_USERS_URL}/user.get.json"
 )
 
 
@@ -71,6 +75,10 @@ def generate(date_start=None, date_end=None) -> pd.DataFrame:
                 f"{settings['availability_status']}"
             )
     return output_data
+
+def generate_users():
+    data = load_data(USERS_URL)
+    return logic.extract_user_fields(data)
 
 def main():
     data = load_data(URL)

@@ -119,6 +119,8 @@ def add_tasks_with_id_to_df(df: pd.DataFrame, tasks_data) -> pd.DataFrame:
     """
     tasks_dict = defaultdict(lambda: defaultdict(dict))
 
+    print(tasks_data)
+
     for task in tasks_data:
         employee = task["responsible"]["name"]
         task_id = str(task["id"])
@@ -148,3 +150,25 @@ def add_tasks_with_id_to_df(df: pd.DataFrame, tasks_data) -> pd.DataFrame:
         )
 
     return df
+
+def extract_user_fields(data):
+    """
+    Извлекает из данных список пользователей с полями ID, XML_ID, NAME и LAST_NAME.
+
+    Args:
+        data (dict): Исходные данные в формате словаря.
+
+    Returns:
+        list: Список словарей с нужными полями.
+    """
+    result = []
+    for user in data.get("result", []):
+        filtered_user = {
+            'ID': user.get('ID'),
+            'XML_ID': user.get('XML_ID'),
+            'EMAIL': user.get('EMAIL'),
+            'NAME': user.get('NAME'),
+            'LAST_NAME': user.get('LAST_NAME')
+        }
+        result.append(filtered_user)
+    return result
