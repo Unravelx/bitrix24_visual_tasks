@@ -2,7 +2,7 @@
 
 1. Склонируйте репозиторий:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Unravelx/bitrix24_visual_tasks.git
    cd <project-folder>
    ```
 
